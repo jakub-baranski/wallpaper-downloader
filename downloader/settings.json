@@ -1,0 +1,12 @@
+{
+  "url_base": "https://alpha.wallhaven.cc/",
+  "categories": {
+    "general": true,
+    "anime": false,
+    "people": true
+  },
+  "sfw": true,
+  "nsfw": false,
+  "resolution": "3840x2160",
+  "sorting": "random"
+}

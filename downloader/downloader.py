@@ -21,8 +21,8 @@ class WallpaperGetter:
             "people": True
         },
         "sfw": True,
-        "nsfw": False,
-        "resolution": "1920x1080",
+        "sketchy": False,
+        "resolution": ["1920x1080"],
         "sorting": "random",
         "keep_wallpapers": 3
     }
@@ -58,18 +58,18 @@ class WallpaperGetter:
     def get_purity_representation(self):
         try:
             logging.info('Setting purity')
-            return '{}{}0'.format(int(self.settings['sfw']), int(self.settings['nsfw']))
+            return '{}{}0'.format(int(self.settings['sfw']), int(self.settings['sketchy']))
         except ValueError as e:
             raise ImproperlyConfigured('\'{}\' is not a valid boolean value'.format(e.args[0].split('\'')[1]))
 
     def compose_search_query(self):
         logging.info('Composing search query string.')
-        return '{}search?q={}&search_image=&categories={}&purity={}&resolution={}&sorting={}'.format(
+        return '{}search?q={}&search_image=&categories={}&purity={}&resolutions={}&sorting={}'.format(
             self.settings['url_base'],
             self.search_query,
             self.get_categories_representation(),
             self.get_purity_representation(),
-            self.settings['resolution'],
+            ','.join(self.settings['resolution']),
             self.settings['sorting'])
 
     def get_wallpapers_id(self):
@@ -100,7 +100,7 @@ class WallpaperGetter:
                 with open(name, 'wb') as handler:
                     handler.write(response.content)
                     logging.info('DONE.')
-                    self.purge_wallpapers(self.settings['keep_wallpapers'])
+                    self.purge_wallpapers()
                     return os.path.abspath(handler.name)
             logging.info('FAILED')
 
@@ -108,13 +108,14 @@ class WallpaperGetter:
         if not os.path.exists('downloads'):
             os.makedirs('downloads')
 
-    def purge_wallpapers(self, keep: int) -> None:
+    def purge_wallpapers(self) -> None:
+        keep = self.settings['keep_wallpapers']
         files = os.listdir('downloads')
-        logging.info('Purging previously downloaded wallpapers. Keeping recent {}.'.format(
-            self.settings['keep_wallpapers']))
-        files.sort(key=lambda file: os.path.getmtime('downloads/{}'.format(file)), reverse=True)
-        for i in range(keep, len(files)):
-            os.remove('downloads/{}'.format(files[i]))
+        if 0 < keep < len(files):
+            logging.info('Purging previously downloaded wallpapers. Keeping recent {}.'.format(keep))
+            files.sort(key=lambda file: os.path.getmtime('downloads/{}'.format(file)), reverse=True)
+            for i in range(keep, len(files)):
+                os.remove('downloads/{}'.format(files[i]))
 
     def set_wallpaper(self):
         # TODO: Make it work for other systems too

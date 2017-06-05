@@ -6,7 +6,7 @@
     "people": true
   },
   "sfw": true,
-  "nsfw": false,
-  "resolution": "3840x2160",
+  "sketchy": false,
+  "resolution": ["1920x1080", "2560x1440"],
   "sorting": "random"
 }
